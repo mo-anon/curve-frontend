@@ -1,4 +1,4 @@
-import '@/global-extensions'
+import '@/analytics/llamadash'
 import { AnalyticsLayout } from '@/analytics/AnalyticsLayout'
 import { PageHome } from '@/analytics/components/PageHome'
 import Skeleton from '@mui/material/Skeleton'
