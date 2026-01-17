@@ -1,11 +1,11 @@
-import { useCallback, useMemo } from 'react'
-import { curvejsApi } from '@/dex/lib/curvejs'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useStore } from '@/dex/store/useStore'
 import { type CurveApi, useCurve } from '@ui-kit/features/connect-wallet'
 import { usePageVisibleInterval } from '@ui-kit/hooks/usePageVisibleInterval'
 import { REFRESH_INTERVAL } from '@ui-kit/lib/model'
 import { useGasInfoAndUpdateLib } from '@ui-kit/lib/model/entities/gas-info'
 import { useNetworks } from '../entities/networks'
+import { usePoolsList } from '../queries/pools-list.query'
 
 export const useAutoRefresh = (chainId: number | undefined) => {
   const { curveApi } = useCurve()
@@ -15,6 +15,7 @@ export const useAutoRefresh = (chainId: number | undefined) => {
   const fetchPoolsVolume = useStore((state) => state.pools.fetchPoolsVolume)
   const fetchPoolsTvl = useStore((state) => state.pools.fetchPoolsTvl)
   const setTokensMapper = useStore((state) => state.tokens.setTokensMapper)
+  const { data: poolsList } = usePoolsList({ chainId, useApi: chainId ? (networks[chainId]?.useApi ?? false) : false })
 
   // this is similar to useNetworkByChain, but it doesn't throw if network is not set (during redirects)
   const network = useMemo(() => chainId && networks[chainId], [chainId, networks])
@@ -37,9 +38,11 @@ export const useAutoRefresh = (chainId: number | undefined) => {
     }
   }, REFRESH_INTERVAL['5m'])
 
-  usePageVisibleInterval(async () => {
-    if (!curveApi || !network) return console.warn('Curve API or network is not defined, cannot refetch pools')
-    const poolIds = await curvejsApi.network.fetchAllPoolsList(curveApi, network)
+  // Temporary duplicate from hydration until we migrate to useQuery for fetchPools
+  useEffect(() => {
+    if (!poolsList || !curveApi || !network || !chainId) return
+
+    const poolIds = poolsList.filter((poolId) => !network.excludePoolsMapper[poolId])
     void fetchPools(curveApi, poolIds, null)
-  }, REFRESH_INTERVAL['11m'])
+  }, [poolsList, chainId, fetchPools, curveApi, network])
 }

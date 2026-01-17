@@ -7,6 +7,7 @@ import type { State } from '@/dex/store/useStore'
 import { ChainId, CurveApi, NetworkConfigFromApi, Wallet } from '@/dex/types/main.types'
 import { log } from '@ui-kit/lib/logging'
 import { fetchNetworks } from '../entities/networks'
+import { fetchPoolsList } from '../queries/pools-list.query'
 
 export type SliceKey = keyof State | ''
 export type StateKey = string
@@ -93,11 +94,10 @@ export const createGlobalSlice = (set: StoreApi<State>['setState'], get: StoreAp
 
     const networks = await fetchNetworks()
     const network = networks[chainId]
-    const { excludePoolsMapper } = network
 
-    // get poolList
-    const poolIds = (await curvejsApi.network.fetchAllPoolsList(curveApi, network)).filter(
-      (poolId) => !excludePoolsMapper[poolId],
+    // Get pools list, and set staletime to 0 to ignore the cache as we got a new lib instance
+    const poolIds = (await fetchPoolsList({ chainId, useApi: network.useApi }, { staleTime: 0 })).filter(
+      (poolId) => !network.excludePoolsMapper[poolId],
     )
 
     // if no pools found for network, set tvl, volume and pools state to empty object
