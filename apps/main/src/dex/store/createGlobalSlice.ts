@@ -96,9 +96,7 @@ export const createGlobalSlice = (set: StoreApi<State>['setState'], get: StoreAp
     const network = networks[chainId]
 
     // Get pools list, and set staletime to 0 to ignore the cache as we got a new lib instance
-    const poolIds = (await fetchPoolsList({ chainId, useApi: network.useApi }, { staleTime: 0 })).filter(
-      (poolId) => !network.excludePoolsMapper[poolId],
-    )
+    const poolIds = await fetchPoolsList({ chainId, useApi: network.useApi }, { staleTime: 0 })
 
     // if no pools found for network, set tvl, volume and pools state to empty object
     if (!poolIds.length) {

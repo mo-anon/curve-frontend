@@ -37,7 +37,7 @@ export const PagePool = () => {
       .catch(() => setPoolNotFound(true))
   }, [curveApi, fetchNewPool, haveAllPools, network, poolId, poolData, push, rChainId])
 
-  return !rFormType || network.excludePoolsMapper[poolId ?? ''] || poolNotFound ? (
+  return !rFormType || poolNotFound ? (
     <ErrorPage title="404" subtitle={t`Pool Not Found`} continueUrl={getPath(props, ROUTE.PAGE_POOLS)} />
   ) : (
     rFormType && poolDataCacheOrApi?.pool?.id === poolId && hasDepositAndStake != null && isHydrated && (

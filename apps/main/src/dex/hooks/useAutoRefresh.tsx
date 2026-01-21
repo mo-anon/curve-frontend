@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useStore } from '@/dex/store/useStore'
 import { type CurveApi, useCurve } from '@ui-kit/features/connect-wallet'
 import { usePageVisibleInterval } from '@ui-kit/hooks/usePageVisibleInterval'
@@ -16,9 +16,6 @@ export const useAutoRefresh = (chainId: number | undefined) => {
   const fetchPoolsTvl = useStore((state) => state.pools.fetchPoolsTvl)
   const setTokensMapper = useStore((state) => state.tokens.setTokensMapper)
   const { data: poolsList } = usePoolsList({ chainId, useApi: chainId ? (networks[chainId]?.useApi ?? false) : false })
-
-  // this is similar to useNetworkByChain, but it doesn't throw if network is not set (during redirects)
-  const network = useMemo(() => chainId && networks[chainId], [chainId, networks])
 
   useGasInfoAndUpdateLib({ chainId, networks })
 
@@ -40,9 +37,8 @@ export const useAutoRefresh = (chainId: number | undefined) => {
 
   // Temporary duplicate from hydration until we migrate to useQuery for fetchPools
   useEffect(() => {
-    if (!poolsList || !curveApi || !network || !chainId) return
+    if (!poolsList || !curveApi || !chainId) return
 
-    const poolIds = poolsList.filter((poolId) => !network.excludePoolsMapper[poolId])
-    void fetchPools(curveApi, poolIds, null)
-  }, [poolsList, chainId, fetchPools, curveApi, network])
+    void fetchPools(curveApi, poolsList, null)
+  }, [poolsList, chainId, fetchPools, curveApi])
 }
