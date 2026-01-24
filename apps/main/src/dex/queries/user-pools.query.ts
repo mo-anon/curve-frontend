@@ -2,6 +2,7 @@ import { requireLib } from '@ui-kit/features/connect-wallet'
 import { createValidationSuite, type FieldsOf } from '@ui-kit/lib'
 import { queryFactory, rootKeys, type ChainQuery, type UserQuery } from '@ui-kit/lib/model'
 import { chainValidationGroup } from '@ui-kit/lib/model/query/chain-validation'
+import { curveApiValidationGroup } from '@ui-kit/lib/model/query/curve-api-validation'
 import { userAddressValidationGroup } from '@ui-kit/lib/model/query/user-address-validation'
 
 type UserPoolsQuery = ChainQuery & UserQuery
@@ -14,6 +15,7 @@ export const { useQuery: useUserPools, fetchQuery: fetchUserPools } = queryFacto
   staleTime: '1m',
   validationSuite: createValidationSuite(({ chainId, userAddress }: UserPoolsParams) => {
     chainValidationGroup({ chainId })
+    curveApiValidationGroup({ chainId })
     userAddressValidationGroup({ userAddress })
   }),
 })
