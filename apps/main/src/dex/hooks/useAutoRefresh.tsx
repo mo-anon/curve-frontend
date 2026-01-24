@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { useStore } from '@/dex/store/useStore'
 import { type CurveApi, useCurve } from '@ui-kit/features/connect-wallet'
 import { usePageVisibleInterval } from '@ui-kit/hooks/usePageVisibleInterval'
@@ -32,13 +32,10 @@ export const useAutoRefresh = (chainId: number | undefined) => {
   usePageVisibleInterval(() => {
     if (curveApi) {
       void fetchPoolsVolumeTvl(curveApi)
+
+      if (poolsList?.length) {
+        void fetchPools(curveApi, poolsList, null)
+      }
     }
   }, REFRESH_INTERVAL['5m'])
-
-  // Temporary duplicate from hydration until we migrate to useQuery for fetchPools
-  useEffect(() => {
-    if (!poolsList || !curveApi || !chainId) return
-
-    void fetchPools(curveApi, poolsList, null)
-  }, [poolsList, chainId, fetchPools, curveApi])
 }
